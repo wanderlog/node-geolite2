@@ -98,8 +98,29 @@ const getSelectedDbs = () => {
   return selected;
 };
 
+const getOverrideDownloadLinkTemplate = () => {
+  const config = getConfig();
+  if (!config) return undefined;
+
+  const template = config['download-link-template'];
+  if (template) {
+    if (typeof template !== 'string') {
+      console.error('Invalid value in download-link-template: should be a string');
+      process.exit(1);
+    } else if (!template.includes('[edition]')) {
+      console.error('download-link-template should include [edition] (and optionally [license-key]) so that we can substitute in e.g., "GeoLite2-City" and your configured license key');
+      process.exit(1);
+    } else {
+      return template;
+    }
+  }
+
+  return undefined;
+}
+
 module.exports = {
   getConfig,
   getLicense,
   getSelectedDbs,
+  getOverrideDownloadLinkTemplate,
 };

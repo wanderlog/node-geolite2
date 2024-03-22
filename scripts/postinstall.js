@@ -3,7 +3,11 @@ const https = require('https');
 const zlib = require('zlib');
 const tar = require('tar');
 const path = require('path');
-const { getLicense, getSelectedDbs } = require('../utils');
+const {
+  getLicense,
+  getSelectedDbs,
+  getOverrideDownloadLinkTemplate
+} = require('../utils');
 
 let licenseKey;
 try {
@@ -32,8 +36,16 @@ if (!licenseKey) {
   process.exit(1);
 }
 
-const link = (edition) =>
-  `https://download.maxmind.com/app/geoip_download?edition_id=${edition}&license_key=${licenseKey}&suffix=tar.gz`;
+const link = (edition) => {
+  const template = getOverrideDownloadLinkTemplate();
+  if (template) {
+    return template
+      .replace(/\[edition]/g, edition)
+      .replace(/\[license-key]/g, licenseKey);
+  } else {
+    return `https://download.maxmind.com/app/geoip_download?edition_id=${edition}&license_key=${licenseKey}&suffix=tar.gz`;
+  }
+};
 
 const selected = getSelectedDbs();
 const editionIds = ['City', 'Country', 'ASN']
